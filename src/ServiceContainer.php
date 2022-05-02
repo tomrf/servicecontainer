@@ -7,6 +7,7 @@ namespace Tomrf\ServiceContainer;
 use RuntimeException;
 use Tomrf\Autowire\Autowire;
 use Tomrf\Autowire\AutowireException;
+use Tomrf\Autowire\NotFoundException;
 
 class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Container\ContainerInterface
 {
