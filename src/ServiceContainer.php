@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tomrf\ServiceContainer;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Tomrf\Autowire\Autowire;
 use Tomrf\Autowire\AutowireException;
@@ -40,17 +42,25 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
     }
 
     /**
+     * Add a service. Fails if the service id has already been assigned.
+     *
      * @throws RuntimeException
      */
     public function add(string $id, mixed $value): void
     {
         if (false !== $this->has($id)) {
-            throw new RuntimeException('Unable to add to container, container already has '.$id);
+            throw new RuntimeException(sprintf(
+                'Unable to add to container, container already has "%s"',
+                $id
+            ));
         }
 
         $this->set($id, $value);
     }
 
+    /**
+     * Remove a service.
+     */
     public function remove(string $id): void
     {
         if ($this->has($id)) {
@@ -59,6 +69,8 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
     }
 
     /**
+     * Resolve class constructor dependencies.
+     *
      * @throws AutowireException
      */
     private function resolve(string $id): mixed
@@ -75,8 +87,31 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
             [$this]
         );
 
-        return $item(
+        $instance = $item(
             ...$dependencies,
         );
+
+        $this->fulfillAwaressTraits($instance);
+
+        return $instance;
+    }
+
+    /**
+     * Fulfill an objects awereness traits.
+     *
+     * @throws NotFoundException
+     */
+    private function fulfillAwaressTraits(mixed $object): void
+    {
+        // LoggerAwareInterface
+        if ($this->has(LoggerInterface::class)) {
+            /** @var LoggerInterface */
+            $logger = $this->get(LoggerInterface::class);
+
+            if ($object instanceof LoggerAwareInterface
+            && method_exists($object, 'setLogger')) {
+                $object->setLogger($logger);
+            }
+        }
     }
 }
