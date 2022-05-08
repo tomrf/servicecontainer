@@ -69,6 +69,24 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
     }
 
     /**
+     * Fulfill an objects awereness traits.
+     *
+     * @throws NotFoundException
+     */
+    public function fulfillAwaressTraits(mixed $object): void
+    {
+        // LoggerAwareInterface
+        if ($this->has(LoggerInterface::class)) {
+            if ($object instanceof LoggerAwareInterface
+            && method_exists($object, 'setLogger')) {
+                /** @var LoggerInterface */
+                $logger = $this->get(LoggerInterface::class);
+                $object->setLogger($logger);
+            }
+        }
+    }
+
+    /**
      * Resolve class constructor dependencies.
      *
      * @throws AutowireException
@@ -94,24 +112,5 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
         $this->fulfillAwaressTraits($instance);
 
         return $instance;
-    }
-
-    /**
-     * Fulfill an objects awereness traits.
-     *
-     * @throws NotFoundException
-     */
-    private function fulfillAwaressTraits(mixed $object): void
-    {
-        // LoggerAwareInterface
-        if ($this->has(LoggerInterface::class)) {
-            /** @var LoggerInterface */
-            $logger = $this->get(LoggerInterface::class);
-
-            if ($object instanceof LoggerAwareInterface
-            && method_exists($object, 'setLogger')) {
-                $object->setLogger($logger);
-            }
-        }
     }
 }
