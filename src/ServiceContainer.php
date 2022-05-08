@@ -87,6 +87,14 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
     }
 
     /**
+     * Return Autowire instance.
+     */
+    public function autowire(): Autowire
+    {
+        return $this->autowire;
+    }
+
+    /**
      * Resolve class constructor dependencies.
      *
      * @throws AutowireException
