@@ -34,7 +34,20 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
             throw new NotFoundException('Not found: '.$id);
         }
 
-        if (\is_callable($this->container[$id])) {
+        // if ($this->container[$id] instanceof ServiceFactory) {
+        //     /** @var ServiceFactory */
+        //     $factory = $this->container[$id];
+
+        //     $dependencies = $this->autowire->resolveDependencies(
+        //         $factory->getClass(),
+        //         '__construct',
+        //         [$this]
+        //     );
+
+        //     $this->container[$id] = $factory->make(...$dependencies);
+        // }
+
+        if (\is_callable($this->container[$id]) || $this->container[$id] instanceof ServiceFactory) {
             $this->container[$id] = $this->resolve($id);
         }
 
@@ -48,7 +61,7 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
      */
     public function add(string $id, mixed $value): void
     {
-        if (false !== $this->has($id)) {
+        if (true === $this->has($id)) {
             throw new RuntimeException(sprintf(
                 'Unable to add to container, container already has "%s"',
                 $id
@@ -63,7 +76,7 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
      */
     public function remove(string $id): void
     {
-        if ($this->has($id)) {
+        if (true === $this->has($id)) {
             unset($this->container[$id]);
         }
     }
@@ -73,12 +86,11 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
      *
      * @throws NotFoundException
      */
-    public function fulfillAwaressTraits(mixed $object): void
+    public function fulfillAwarenessTraits(mixed $object): void
     {
         // LoggerAwareInterface
         if ($this->has(LoggerInterface::class)) {
-            if ($object instanceof LoggerAwareInterface
-            && method_exists($object, 'setLogger')) {
+            if ($object instanceof LoggerAwareInterface) {
                 /** @var LoggerInterface */
                 $logger = $this->get(LoggerInterface::class);
                 $object->setLogger($logger);
@@ -101,23 +113,29 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
      */
     private function resolve(string $id): mixed
     {
-        $item = $this->container[$id];
+        $objectOrClass = $this->container[$id];
 
-        if (!\is_callable($item) || !\is_object($item)) {
-            return $item;
+        if (!\is_callable($objectOrClass) && !$objectOrClass instanceof ServiceFactory) {
+            return $objectOrClass;
         }
 
         $dependencies = $this->autowire->resolveDependencies(
-            $item,
+            \is_callable($objectOrClass) ? $objectOrClass : $objectOrClass->getClass(),
             '__construct',
             [$this]
         );
 
-        $instance = $item(
-            ...$dependencies,
-        );
+        if ($objectOrClass instanceof ServiceFactory) {
+            $instance = $objectOrClass->make(
+                ...$dependencies,
+            );
+        } else {
+            $instance = $objectOrClass(
+                ...$dependencies,
+            );
+        }
 
-        $this->fulfillAwaressTraits($instance);
+        $this->fulfillAwarenessTraits($instance);
 
         return $instance;
     }
