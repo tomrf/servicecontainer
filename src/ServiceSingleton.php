@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tomrf\ServiceContainer;
 
-class ServiceFactory
+class ServiceSingleton extends ServiceFactory
 {
+    protected object $instance;
+
     public function __construct(
         protected string $class
     ) {
@@ -13,7 +15,11 @@ class ServiceFactory
 
     public function make(...$args): object
     {
-        return new $this->class(...$args);
+        if (!isset($this->instance)) {
+            $this->instance = new $this->class(...$args);
+        }
+
+        return $this->instance;
     }
 
     public function getClass(): string

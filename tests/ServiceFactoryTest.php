@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tomrf\ServiceContainer;
 
 use DepsOnSimple;
+use OptsOnSimple;
+use RandomNumber;
 use Simple;
 use Tomrf\Autowire\Autowire;
 
@@ -24,9 +26,7 @@ final class ServiceFactoryTest extends \PHPUnit\Framework\TestCase
 
         require_once 'classes/OptsOnSimple.php';
 
-        static::$serviceContainer = new ServiceContainer(
-            new Autowire()
-        );
+        require_once 'classes/RandomNumber.php';
     }
 
     public function testServiceFactory(): void
@@ -45,12 +45,67 @@ final class ServiceFactoryTest extends \PHPUnit\Framework\TestCase
         $serviceContainer->add(DepsOnSimple::class, $factory);
 
         $depsOnSimple = $serviceContainer->get(DepsOnSimple::class);
-
         static::assertInstanceOf(DepsOnSimple::class, $depsOnSimple);
     }
 
-    private function serviceContainer(): ServiceContainer
+    public function testServiceFactoryWithOptionalDependenciesNotMet(): void
     {
-        return static::$serviceContainer;
+        $serviceContainer = new ServiceContainer(new Autowire());
+
+        $factory = new ServiceFactory(OptsOnSimple::class);
+        $serviceContainer->add(OptsOnSimple::class, $factory);
+
+        $optsOnSimple = $serviceContainer->get(OptsOnSimple::class);
+        static::assertInstanceOf(OptsOnSimple::class, $optsOnSimple);
+        static::assertFalse($optsOnSimple->hasSimple());
+    }
+
+    public function testServiceFactoryWithOptionalDependenciesMet(): void
+    {
+        $serviceContainer = new ServiceContainer(new Autowire());
+
+        $factory = new ServiceFactory(OptsOnSimple::class);
+        $serviceContainer->add(OptsOnSimple::class, $factory);
+        $serviceContainer->add(Simple::class, new Simple());
+
+        $optsOnSimple = $serviceContainer->get(OptsOnSimple::class);
+        static::assertInstanceOf(OptsOnSimple::class, $optsOnSimple);
+        static::assertTrue($optsOnSimple->hasSimple());
+    }
+
+    public function testServiceFactoryBehavesLikeFactory(): void
+    {
+        $serviceContainer = new ServiceContainer(new Autowire());
+        $factory = new ServiceFactory(RandomNumber::class);
+
+        $serviceContainer->add(Simple::class, new Simple());
+        $serviceContainer->add(RandomNumber::class, $factory);
+
+        /** @var RandomNumber */
+        $random = $serviceContainer->get(RandomNumber::class);
+
+        static::assertSame($random->getNumber(), $random->getNumber());
+        static::assertNotSame(
+            ($serviceContainer->get(RandomNumber::class))->getNumber(),
+            ($serviceContainer->get(RandomNumber::class))->getNumber(),
+        );
+    }
+
+    public function testServiceSingleton(): void
+    {
+        $serviceContainer = new ServiceContainer(new Autowire());
+        $factory = new ServiceSingleton(RandomNumber::class);
+
+        $serviceContainer->add(Simple::class, new Simple());
+        $serviceContainer->add(RandomNumber::class, $factory);
+
+        /** @var RandomNumber */
+        $random = $serviceContainer->get(RandomNumber::class);
+
+        static::assertSame($random->getNumber(), $random->getNumber());
+        static::assertSame(
+            ($serviceContainer->get(RandomNumber::class))->getNumber(),
+            ($serviceContainer->get(RandomNumber::class))->getNumber(),
+        );
     }
 }
