@@ -34,11 +34,13 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
             throw new NotFoundException('Not found: '.$id);
         }
 
-        // if (\is_callable($this->container[$id]) || $this->container[$id] instanceof ServiceFactory) {
-        //     $this->container[$id] = $this->resolve($id);
-        // }
+        $resolved = $this->resolve($id);
 
-        return $this->resolve($id);
+        if (\is_object($resolved)) {
+            $this->fulfillAwarenessTraits($resolved);
+        }
+
+        return $resolved;
     }
 
     /**
@@ -113,17 +115,13 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
         );
 
         if ($objectOrClass instanceof ServiceFactory) {
-            $instance = $objectOrClass->make(
-                ...$dependencies,
-            );
-        } else {
-            $instance = $objectOrClass(
+            return $objectOrClass->make(
                 ...$dependencies,
             );
         }
 
-        $this->fulfillAwarenessTraits($instance);
-
-        return $instance;
+        return $objectOrClass(
+            ...$dependencies,
+        );
     }
 }
