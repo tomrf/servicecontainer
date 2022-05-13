@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tomrf\ServiceContainer;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Tomrf\Autowire\Autowire;
 use Tomrf\Autowire\AutowireException;
@@ -39,13 +37,7 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
             throw new NotFoundException('Not found: '.$id);
         }
 
-        $resolved = $this->resolve($id);
-
-        if (\is_object($resolved)) {
-            $this->fulfillAwarenessTraits($resolved);
-        }
-
-        return $resolved;
+        return $this->resolve($id);
     }
 
     /**
@@ -76,18 +68,25 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
     }
 
     /**
-     * Fulfill an objects awereness traits.
+     * Fulfill the objects awereness traits using the provided trait map.
+     *
+     * @param array<array<string,string>> $traitMap
      *
      * @throws NotFoundException
      */
-    public function fulfillAwarenessTraits(mixed $object): void
+    public function fulfillAwarenessTraits(object $object, array $traitMap): void
     {
-        // LoggerAwareInterface
-        if ($this->has(LoggerInterface::class)) {
-            if ($object instanceof LoggerAwareInterface) {
-                /** @var LoggerInterface */
-                $logger = $this->get(LoggerInterface::class);
-                $object->setLogger($logger);
+        $traits = class_uses($object);
+        if (\is_bool($traits)) {
+            return;
+        }
+
+        foreach ($traits as $trait) {
+            if (isset($traitMap[$trait])) {
+                $setMethod = key($traitMap[$trait]);
+                $class = $traitMap[$trait][$setMethod];
+
+                $object->{$setMethod}($this->get($class));
             }
         }
     }
