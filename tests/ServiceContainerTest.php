@@ -109,6 +109,23 @@ final class ServiceContainerTest extends \PHPUnit\Framework\TestCase
         static::assertInstanceOf(Simple::class, $hasSimpleAwareness->getSimple());
     }
 
+    public function testFulfillTraitsWithCallable(): void
+    {
+        $newContainer = new ServiceContainer(new Autowire());
+        $newContainer->add(Simple::class, new Simple());
+        $newContainer->add(HasSimpleAwareness::class, new HasSimpleAwareness());
+
+        $hasSimpleAwareness = $newContainer->get(HasSimpleAwareness::class);
+
+        $newContainer->fulfillAwarenessTraits($hasSimpleAwareness, [
+            'SimpleAwareTrait' => [
+                'setSimple' => fn () => Simple::class,
+            ],
+        ]);
+
+        static::assertInstanceOf(Simple::class, $hasSimpleAwareness->getSimple());
+    }
+
     private function serviceContainer(): ServiceContainer
     {
         return static::$serviceContainer;

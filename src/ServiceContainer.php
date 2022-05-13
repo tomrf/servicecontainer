@@ -70,7 +70,7 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
     /**
      * Fulfill the objects awereness traits using the provided trait map.
      *
-     * @param array<array<string,string>> $traitMap
+     * @param array<array<string,callable|string>> $traitMap
      *
      * @throws NotFoundException
      */
@@ -84,9 +84,13 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
         foreach ($traits as $trait) {
             if (isset($traitMap[$trait])) {
                 $setMethod = key($traitMap[$trait]);
-                $class = $traitMap[$trait][$setMethod];
+                $classOrCallable = $traitMap[$trait][$setMethod];
 
-                $object->{$setMethod}($this->get($class));
+                if (\is_callable($classOrCallable)) {
+                    $classOrCallable = (string) $classOrCallable();
+                }
+
+                $object->{$setMethod}($this->get($classOrCallable));
             }
         }
     }
