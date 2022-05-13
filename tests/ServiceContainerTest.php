@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tomrf\ServiceContainer;
 
 use DepsOnSimple;
+use HasSimpleAwareness;
 use OptsOnSimple;
 use Psr\Container\ContainerInterface;
 use Simple;
@@ -25,6 +26,10 @@ final class ServiceContainerTest extends \PHPUnit\Framework\TestCase
         require_once 'classes/DepsOnSimple.php';
 
         require_once 'classes/OptsOnSimple.php';
+
+        require_once 'classes/SimpleAwareTrait.php';
+
+        require_once 'classes/HasSimpleAwareness.php';
 
         static::$serviceContainer = new ServiceContainer(
             new Autowire()
@@ -83,6 +88,25 @@ final class ServiceContainerTest extends \PHPUnit\Framework\TestCase
         $newContainer->add(OptsOnSimple::class, fn (?Simple $simple) => new OptsOnSimple($simple));
         static::assertInstanceOf(OptsOnSimple::class, $newContainer->get(OptsOnSimple::class));
         static::assertTrue($newContainer->get(OptsOnSimple::class)->hasSimple());
+    }
+
+    public function testFulfillTraits(): void
+    {
+        $newContainer = new ServiceContainer(new Autowire());
+        $newContainer->add(Simple::class, new Simple());
+        $newContainer->add(HasSimpleAwareness::class, new HasSimpleAwareness());
+
+        $hasSimpleAwareness = $newContainer->get(HasSimpleAwareness::class);
+
+        static::assertNull($hasSimpleAwareness->getSimple());
+
+        $newContainer->fulfillAwarenessTraits($hasSimpleAwareness, [
+            'SimpleAwareTrait' => [
+                'setSimple' => Simple::class,
+            ],
+        ]);
+
+        static::assertInstanceOf(Simple::class, $hasSimpleAwareness->getSimple());
     }
 
     private function serviceContainer(): ServiceContainer
