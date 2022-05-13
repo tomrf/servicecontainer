@@ -116,10 +116,18 @@ final class ServiceContainerTest extends \PHPUnit\Framework\TestCase
         $newContainer->add(HasSimpleAwareness::class, new HasSimpleAwareness());
 
         $hasSimpleAwareness = $newContainer->get(HasSimpleAwareness::class);
-
         $newContainer->fulfillAwarenessTraits($hasSimpleAwareness, [
             'SimpleAwareTrait' => [
                 'setSimple' => fn () => Simple::class,
+            ],
+        ]);
+
+        static::assertInstanceOf(Simple::class, $hasSimpleAwareness->getSimple());
+
+        $hasSimpleAwareness = $newContainer->get(HasSimpleAwareness::class);
+        $newContainer->fulfillAwarenessTraits($hasSimpleAwareness, [
+            'SimpleAwareTrait' => [
+                'setSimple' => fn () => new Simple(),
             ],
         ]);
 

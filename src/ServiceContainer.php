@@ -87,10 +87,16 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
                 $classOrCallable = $traitMap[$trait][$setMethod];
 
                 if (\is_callable($classOrCallable)) {
-                    $classOrCallable = (string) $classOrCallable();
+                    $classOrCallable = $classOrCallable();
                 }
 
-                $object->{$setMethod}($this->get($classOrCallable));
+                if (\is_string($classOrCallable)) {
+                    $object->{$setMethod}($this->get($classOrCallable));
+
+                    continue;
+                }
+
+                $object->{$setMethod}($classOrCallable);
             }
         }
     }
