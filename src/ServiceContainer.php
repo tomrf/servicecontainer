@@ -11,6 +11,11 @@ use Tomrf\Autowire\Autowire;
 use Tomrf\Autowire\AutowireException;
 use Tomrf\Autowire\NotFoundException;
 
+/**
+ * ServiceContainer.
+ *
+ * @SuppressWarnings(PHPMD.ShortVariable)
+ */
 class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Container\ContainerInterface
 {
     /**
@@ -102,25 +107,29 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
      */
     private function resolve(string $id): mixed
     {
-        $objectOrClass = $this->container[$id];
+        $object = $this->container[$id];
 
-        if (!\is_callable($objectOrClass) && !$objectOrClass instanceof ServiceFactory) {
-            return $objectOrClass;
+        if (!\is_object($object)) {
+            return $object;
+        }
+
+        if (!\is_callable($object) && !$object instanceof ServiceFactory) {
+            return $object;
         }
 
         $dependencies = $this->autowire->resolveDependencies(
-            \is_callable($objectOrClass) ? $objectOrClass : $objectOrClass->getClass(),
+            ($object instanceof ServiceFactory) ? $object->getClass() : $object,
             '__construct',
             [$this]
         );
 
-        if ($objectOrClass instanceof ServiceFactory) {
-            return $objectOrClass->make(
+        if ($object instanceof ServiceFactory) {
+            return $object->make(
                 ...$dependencies,
             );
         }
 
-        return $objectOrClass(
+        return $object(
             ...$dependencies,
         );
     }

@@ -11,7 +11,7 @@ class ServiceFactory
     ) {
     }
 
-    public function make(...$args): object
+    public function make(object|null ...$args): object
     {
         return new $this->class(...$args);
     }
