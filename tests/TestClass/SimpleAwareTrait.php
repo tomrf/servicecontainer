@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+namespace Tomrf\ServiceContainer\Test\TestClass;
+
+/**
+ * @internal
+ */
 trait SimpleAwareTrait
 {
     private ?Simple $simple = null;

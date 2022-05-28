@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Tomrf\ServiceContainer;
+namespace Tomrf\ServiceContainer\Test;
 
-use DepsOnSimple;
-use OptsOnSimple;
-use RandomNumber;
-use Simple;
 use Tomrf\Autowire\Autowire;
+use Tomrf\ServiceContainer\ServiceContainer;
+use Tomrf\ServiceContainer\ServiceFactory;
+use Tomrf\ServiceContainer\ServiceSingleton;
+use Tomrf\ServiceContainer\Test\TestClass\DepsOnSimple;
+use Tomrf\ServiceContainer\Test\TestClass\OptsOnSimple;
+use Tomrf\ServiceContainer\Test\TestClass\RandomNumber;
+use Tomrf\ServiceContainer\Test\TestClass\Simple;
 
 /**
  * @internal
@@ -20,13 +23,6 @@ final class ServiceFactoryTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
-        require_once 'classes/Simple.php';
-
-        require_once 'classes/DepsOnSimple.php';
-
-        require_once 'classes/OptsOnSimple.php';
-
-        require_once 'classes/RandomNumber.php';
     }
 
     public function testServiceFactory(): void

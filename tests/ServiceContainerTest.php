@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Tomrf\ServiceContainer;
+namespace Tomrf\ServiceContainer\Test;
 
-use DepsOnSimple;
-use HasSimpleAwareness;
-use OptsOnSimple;
 use Psr\Container\ContainerInterface;
-use Simple;
 use Tomrf\Autowire\Autowire;
+use Tomrf\ServiceContainer\ServiceContainer;
+use Tomrf\ServiceContainer\Test\TestClass\DepsOnSimple;
+use Tomrf\ServiceContainer\Test\TestClass\HasSimpleAwareness;
+use Tomrf\ServiceContainer\Test\TestClass\OptsOnSimple;
+use Tomrf\ServiceContainer\Test\TestClass\Simple;
 
 /**
  * @internal
@@ -21,16 +22,6 @@ final class ServiceContainerTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
-        require_once 'classes/Simple.php';
-
-        require_once 'classes/DepsOnSimple.php';
-
-        require_once 'classes/OptsOnSimple.php';
-
-        require_once 'classes/SimpleAwareTrait.php';
-
-        require_once 'classes/HasSimpleAwareness.php';
-
         static::$serviceContainer = new ServiceContainer(
             new Autowire()
         );
@@ -101,7 +92,7 @@ final class ServiceContainerTest extends \PHPUnit\Framework\TestCase
         static::assertNull($hasSimpleAwareness->getSimple());
 
         $newContainer->fulfillAwarenessTraits($hasSimpleAwareness, [
-            'SimpleAwareTrait' => [
+            'Tomrf\ServiceContainer\Test\TestClass\SimpleAwareTrait' => [
                 'setSimple' => Simple::class,
             ],
         ]);
@@ -117,7 +108,7 @@ final class ServiceContainerTest extends \PHPUnit\Framework\TestCase
 
         $hasSimpleAwareness = $newContainer->get(HasSimpleAwareness::class);
         $newContainer->fulfillAwarenessTraits($hasSimpleAwareness, [
-            'SimpleAwareTrait' => [
+            'Tomrf\ServiceContainer\Test\TestClass\SimpleAwareTrait' => [
                 'setSimple' => fn () => Simple::class,
             ],
         ]);
@@ -126,7 +117,7 @@ final class ServiceContainerTest extends \PHPUnit\Framework\TestCase
 
         $hasSimpleAwareness = $newContainer->get(HasSimpleAwareness::class);
         $newContainer->fulfillAwarenessTraits($hasSimpleAwareness, [
-            'SimpleAwareTrait' => [
+            'Tomrf\ServiceContainer\Test\TestClass\SimpleAwareTrait' => [
                 'setSimple' => fn () => new Simple(),
             ],
         ]);

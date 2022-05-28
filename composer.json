@@ -22,18 +22,23 @@
             "Tomrf\\ServiceContainer\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tomrf\\ServiceContainer\\Test\\": "tests/"
+        }
+    },
     "scripts": {
         "phpunit": [
-            "phpunit --do-not-cache-result"
-        ],
-        "cs-fixer": [
-            "php-cs-fixer fix --allow-risky=yes --diff --verbose src/"
+            "phpunit -c .phpunit.dist.xml --colors=auto --coverage-text --stderr --repeat 10"
         ],
         "phpstan": [
             "phpstan analyze --level max src/"
         ],
         "phpmd": [
-            "phpmd src/ ansi .phpmd-ruleset.xml"
+            "phpmd src/ ansi .phpmd-ruleset.dist.xml"
+        ],
+        "cs-fixer": [
+            "php-cs-fixer fix --allow-risky=yes --diff --verbose src/"
         ],
         "test": [
             "@phpunit",

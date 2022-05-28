@@ -2,7 +2,12 @@
 
 declare(strict_types=1);
 
-class RandomNumber
+namespace Tomrf\ServiceContainer\Test\TestClass;
+
+/**
+ * @internal
+ */
+final class RandomNumber
 {
     private int $randomNumber;
 

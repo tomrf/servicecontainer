@@ -2,7 +2,12 @@
 
 declare(strict_types=1);
 
-class HasSimpleAwareness
+namespace Tomrf\ServiceContainer\Test\TestClass;
+
+/**
+ * @internal
+ */
+final class HasSimpleAwareness
 {
     use SimpleAwareTrait;
 
