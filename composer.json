@@ -8,7 +8,7 @@
     "require": {
         "php": ">=8.0",
         "psr/container": "^2.0",
-        "tomrf/autowire": "^0.0.5"
+        "tomrf/autowire": "^0.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",

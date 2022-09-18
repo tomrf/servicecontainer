@@ -7,14 +7,13 @@ namespace Tomrf\ServiceContainer;
 use RuntimeException;
 use Tomrf\Autowire\Autowire;
 use Tomrf\Autowire\AutowireException;
-use Tomrf\Autowire\NotFoundException;
 
 /**
  * ServiceContainer.
  *
  * @SuppressWarnings(PHPMD.ShortVariable)
  */
-class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Container\ContainerInterface
+class ServiceContainer implements \Psr\Container\ContainerInterface
 {
     /**
      * @var array<string,mixed>
@@ -24,6 +23,11 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
     public function __construct(
         private Autowire $autowire
     ) {
+    }
+
+    public function has(string $id): bool
+    {
+        return isset($this->container[$id]);
     }
 
     /**
@@ -55,6 +59,11 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
         }
 
         $this->set($id, $value);
+    }
+
+    public function set(string $id, mixed $value): void
+    {
+        $this->container[$id] = $value;
     }
 
     /**
@@ -128,8 +137,7 @@ class ServiceContainer extends \Tomrf\Autowire\Container implements \Psr\Contain
 
         $dependencies = $this->autowire->resolveDependencies(
             ($object instanceof ServiceFactory) ? $object->getClass() : $object,
-            '__construct',
-            [$this]
+            $this
         );
 
         if ($object instanceof ServiceFactory) {
